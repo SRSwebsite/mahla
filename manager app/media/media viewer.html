@@ -1476,7 +1476,105 @@
     transform: scale(.95);
 }
 
+/* =========================================================
+   FILE FULL LINK
+========================================================= */
 
+.file-link-area {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border);
+}
+
+.file-link-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    min-width: 0;
+}
+
+.file-link-value {
+    flex: 1;
+    min-width: 0;
+
+    display: block;
+
+    padding: 9px 11px;
+
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid var(--border);
+
+    border-radius: 10px;
+
+    color: var(--primary-dark);
+
+    font-size: 12px;
+    line-height: 1.7;
+
+    direction: ltr;
+    text-align: left;
+
+    white-space: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    scrollbar-width: thin;
+
+    cursor: text;
+}
+
+.file-link-value::-webkit-scrollbar {
+    height: 4px;
+}
+
+.file-link-value::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 10px;
+}
+
+.file-link-value:hover {
+    border-color: var(--primary-light);
+    background: #fff;
+}
+
+.file-link-area .file-id-label {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.file-link-area .file-id-copy {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.file-link-area .file-drive-btn {
+    flex-shrink: 0;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 650px) {
+
+    .file-link-row {
+        flex-wrap: wrap;
+    }
+
+    .file-link-value {
+        width: 100%;
+        flex-basis: 100%;
+        font-size: 11px;
+    }
+
+    .file-link-area .file-id-copy,
+    .file-link-area .file-drive-btn {
+        flex-shrink: 0;
+    }
+
+}
 /* =========================================================
    FILE DRIVE BUTTON
 ========================================================= */
@@ -2086,7 +2184,6 @@
 
             </div>
 
-
             <!-- FILE ID -->
 
             ${
@@ -2138,6 +2235,50 @@
 
                         </div>
 
+
+                        <!-- FILE LINK -->
+
+                        <div class="file-link-area">
+
+                            <span class="file-id-label">
+                                🔗 لینک کامل فایل
+                            </span>
+
+                            <div class="file-link-row">
+
+                                <span
+                                    class="file-link-value"
+                                    title="${escapeAttr(driveUrl)}"
+                                >
+                                    ${escapeHtml(driveUrl)}
+                                </span>
+
+                                <button
+                                    class="file-id-copy"
+                                    onclick="copyFileLink(
+                                        event,
+                                        '${escapeJS(id)}'
+                                    )"
+                                    title="کپی لینک کامل فایل"
+                                >
+                                    📋 کپی لینک
+                                </button>
+
+                                <button
+                                    class="file-drive-btn"
+                                    onclick="openDriveFile(
+                                        event,
+                                        '${escapeJS(id)}'
+                                    )"
+                                    title="باز کردن لینک فایل"
+                                >
+                                    🔗
+                                </button>
+
+                            </div>
+
+                        </div>
+
                     </div>
                 `
                 : `
@@ -2154,7 +2295,6 @@
                     </div>
                 `
             }
-
 
             <!-- FOOTER -->
 
@@ -2437,7 +2577,61 @@ async function copyId(event, id, label = "شناسه") {
         textarea.remove();
     }
 }
+/* =========================================================
+   COPY FILE LINK
+========================================================= */
 
+async function copyFileLink(event, id) {
+
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+
+    if (!id) {
+        showToast("❌ شناسه فایل موجود نیست");
+        return;
+    }
+
+    const url =
+        `https://drive.google.com/file/d/${encodeURIComponent(id)}/view`;
+
+    try {
+
+        await navigator.clipboard.writeText(url);
+
+        showToast("✅ لینک کامل فایل کپی شد");
+
+    } catch (error) {
+
+        const textarea =
+            document.createElement("textarea");
+
+        textarea.value = url;
+
+        textarea.style.position = "fixed";
+        textarea.style.left = "-9999px";
+
+        document.body.appendChild(textarea);
+
+        textarea.focus();
+        textarea.select();
+
+        try {
+
+            document.execCommand("copy");
+
+            showToast("✅ لینک کامل فایل کپی شد");
+
+        } catch (copyError) {
+
+            showToast("❌ کپی لینک ناموفق بود");
+
+        }
+
+        textarea.remove();
+    }
+}
 
 /* =========================================================
    OPEN DRIVE FOLDER
